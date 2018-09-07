@@ -1,0 +1,23 @@
+{{- if and .Values.ingressInterno.enable -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "aplic.fullname" . }}-interno
+  annotations:
+    kubernetes.io/ingress.class: nginx-interno
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+spec:
+  rules:
+  - host: {{ .Values.ingressInterno.hostname | quote }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ template "aplic.fullname" . }}
+          servicePort: {{ .Values.ingressInterno.servicePort }}
+{{- if .Values.ingressInterno.tls }}
+  tls:
+{{ toYaml .Values.ingressInterno.tls | indent 4 }}
+{{- end -}}
+{{- end }}

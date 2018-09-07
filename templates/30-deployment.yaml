@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ include "aplic.fullname" . }}
+  labels:
+    app: {{ include "aplic.name" . }}
+    chart: {{ include "aplic.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "aplic.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "aplic.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+{{- if .Values.deployment.serviceAccountName }}
+      serviceAccountName: {{ .Values.deployment.serviceAccountName }}
+{{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.deployment.image }}"
+{{- if .Values.deployment.environments }}
+        env:
+{{ toYaml .Values.deployment.environments | indent 10 }}
+{{- end }}
+{{- if .Values.deployment.ports }}
+        ports:
+{{ toYaml .Values.deployment.ports | indent 10 }}
+{{- end }}
+{{- if .Values.deployment.volumeMounts }}
+        volumeMounts:
+{{ toYaml .Values.deployment.volumeMounts | indent 10 }}
+{{- end }}
+{{- if .Values.deployment.volumes }}
+      volumes:
+{{ toYaml .Values.deployment.volumes | indent 8 }}
+{{- end }}
